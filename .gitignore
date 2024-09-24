@@ -1,0 +1,87 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Django specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+.env
+.env.*
+
+# If you're using PostgreSQL and SQLite
+*.db
+
+# Media files
+media/
+staticfiles/
+
+# Local development environment
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+*~
+
+# Docker
+docker-compose.override.yml
+docker-compose.yml
+.docker/
+logs/
+volumes/
+
+# Celery beat and workers
+celerybeat-schedule
+celerybeat.pid
+
+# Pytest cache
+.pytest_cache/
+
+# Testing
+.coverage
+.tox/
+.nox/
+
+# Virtual environment
+venv/
+ENV/
+env/
+.envrc
+.pipenv/
+.venv/
+
+# Static files collected by Django's `collectstatic` command
+static/
+
+
+# VS Code
+.vscode/

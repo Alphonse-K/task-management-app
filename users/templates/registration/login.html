@@ -1,0 +1,30 @@
+{% extends 'base.html'%}
+{% load crispy_forms_tags %} 
+{% block title %}Add an Article{% endblock %}
+
+{% block content %}
+    <div class="container-fluid" style="display: flex; justify-content: center; margin-top: 7rem; margin-bottom: 7rem;">
+        <div class="col-12 col-sm-12 col-md-6 col-lg-4" >
+          {% if messages %}
+            <ul  class="messages" style="display: flex; flex-direction: column; justify-content: flex-start;  margin: 0; padding: 0;">
+            {% for message in messages %}
+                <li style="list-style-type: none;" class="alert alert-success">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+          {% if form.errors %}<p class="alert alert-danger">Corrigez les erreurs avant de continuer<p>{% endif %}
+          <form action="{% url 'login' %}" method="post">
+              {% csrf_token %}
+              {{ form|crispy }}
+              <div >
+                <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                  <input type="submit" value="Submit" style="background-color: #186F65; color: white; border: none;">
+                  <a href="{% url 'password_reset' %}">Mot de passe oublie?</a>
+                </div>
+                  
+                  <a href="{% url 'register' %}">Vous n'avez pas encore de compte?</a>
+              </div>
+          </form>
+        </div>
+    </div>
+{% endblock %}

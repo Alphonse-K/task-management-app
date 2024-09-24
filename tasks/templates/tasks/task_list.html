@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %} 
+{% block title %}Add an Article{% endblock %}
+
+{% block content %}
+  <div class="content container-fluid co-l-12 col-sm-12 col-md-12 col-lg-8">
+    {% if messages %}
+      <ul  class="messages" style="display: flex; flex-direction: column;  justify-content: flex-start;  margin: 0; padding: 0;">
+      {% for message in messages %}
+          <li style="list-style-type: none;" class="alert alert-success">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    <!-- Button to open the modal -->
+    <form method="get" class="mb-3" id="filter-form">
+      <div class="row">
+          <div class="col-md-4">
+              <p>Trier par priorité</p>
+              <select name="priority" class="form-select" onchange="this.form.submit()">
+                  <option value="">All Priorities</option>
+                  {% for priority in priorities %}
+                      <option value="{{ priority.0 }}" {% if request.GET.priority == priority.0 %}selected{% endif %}>{{ priority.1 }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+          <div class="col-md-4">
+              <p>Trier par date</p>
+              <input type="date" name="due_date" class="form-control" value="{{ request.GET.due_date }}" onchange="this.form.submit()" />
+          </div>
+      </div>
+    </form>
+  
+    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+        Create New Task
+    </button>
+
+    <!-- Task List -->
+        {% for task, update_form in tasks_with_forms %}
+          <div class="task-items">
+            <a href="">
+                <div class="row task-items-internal">
+                  <div class="d-flex col-4"><i style="padding-right: .2rem;">Title: </i><strong class="mb-1">{{ task.title }}</strong></div>
+                  <div class="col-2" >
+                    {% if task.completed %}
+                      <i>status: </i><span style="border-radius: 3rem;" class="badge bg-success">finished</span>              
+                    {% else %}
+                      <i>status: </i><span style="border-radius: 3rem;" class="badge bg-danger">Pending</span>               
+                    {% endif %}
+                  </div>
+                  <div class="col-3" >
+                    <p><i>category:</i> <strong>{{ task.category }}</strong></p>
+                  </div>
+                  <div class="col-3">
+                    {% if task.priority == 'high' %}
+                        <i>priority: </i><span style="background-color: #dc3545; color: white; border-radius: .2rem; padding: .3rem; text-align: center; ">{{ task.priority }}</span>
+                      {%elif task.priority == 'medium' %}
+                        <i>priority: </i><span style="background-color: #ffc107; color: white; border-radius: .2rem; padding: .3rem; text-align: center; ">{{ task.priority }}</span>
+                      {% else %}
+                        <i>priority: </i><span style="background-color: #198754; color: white; border-radius: .2rem; padding: .3rem; text-align: center; ">{{ task.priority }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <div>
+                    <span><i class="fas fa-calendar"></i></span>
+                    <span>Due date: {{ task.due_date }}</span><br>
+                  </div>
+                  <div style="display: flex; justify-content: flex-start;">
+                    <a href="#!" style="color: #186F65;" data-bs-toggle="modal" data-bs-target="#updateTaskModal-{{ task.id }}">
+                      <i id="update-btn-{{ task.id }}" class="fas fa-plus" data-task-id="{{ task.id }}">update</i>
+                    </a>
+                    <button type="submit" style="background:transparent !important; color: #186F65;" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ task.id }}">
+                      <i id="delete-btn-{{ task.id }}" style="margin-left: .3rem;" class="fas fa-trash" data-task-id="{{ task.id }}">delete</i>
+                    </button>
+                  </div>
+                </div>
+            </a>
+          </div>
+
+           <!-- Modal for Task Deletion -->
+          <div class="modal fade" id="deleteModal-{{ task.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ task.id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="deleteModalLabel-{{ task.id }}">Confirm Deletion</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Do you want to delete this task?</p>
+                </div>
+                <div class="modal-footer">
+                  <form method="post" action="{% url 'tasks:delete' pk=task.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" style="color: white;">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bootstrap Modal for Update  -->
+          <div class="modal fade" id="updateTaskModal-{{ task.id }}" tabindex="-1" role="dialog" aria-labelledby="createTaskModalLabel-{{ task.id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div style="display: flex; justify-content: space-between;" class="modal-header">
+                        <h5 class="modal-title" id="createTaskModalLabel-{{ task.id }}">Update Task</h5>
+                        <button style="color: white; border-radius: .3rem;" type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span  aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createTaskForm-{{ task.id }}" method="post" action="{% url 'tasks:update' pk=task.id %}">
+                            {% csrf_token %}
+                            {{ update_form.title|as_crispy_field }}
+                            <div class="row form-row">
+                              <div class="form-group col-md-4 mb-0">
+                                {{ update_form.due_date|as_crispy_field }}
+                              </div>
+                              <div class="form-group col-md-4 mb-0">
+                                {{ update_form.priority|as_crispy_field }}
+                              </div>
+                              <div class="form-group col-md-4 mb-0">
+                                {{ update_form.category|as_crispy_field }}
+                              </div>
+                            </div>
+                            {{ update_form.description | as_crispy_field }}
+                            <div>
+                              {{ update_form.completed}}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Task</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <br>
+        {% empty %}
+            <p>No tasks available.</p>
+        {% endfor %}
+        <div class="pagination mb-5">
+          <span class="step-links">
+              {% if page_obj.has_previous %}
+                  <a href="?page=1">&laquo; first</a>
+                  <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+              {% endif %}
+      
+              <span class="current">
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+              </span>
+      
+              {% if page_obj.has_next %}
+                  <a href="?page={{ page_obj.next_page_number }}">next</a>
+                  <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+              {% endif %}
+          </span>
+      </div>
+    </div>
+</div>
+
+<!-- Bootstrap Modal for Task Creation -->
+<div class="modal fade" id="createTaskModal" tabindex="-1" role="dialog" aria-labelledby="createTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between;" class="modal-header">
+                <h5 class="modal-title" id="createTaskModalLabel">Create New Task</h5>
+                <button style="color: white; border-radius: .3rem;" type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span  aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm" method="post" action="{% url 'tasks:create' %}">
+                    {% csrf_token %}
+                    {{ form.title|as_crispy_field}}
+                    <div class="row form-row">
+                      <div class="form-group col-md-4 mb-0">
+                        {{ form.due_date|as_crispy_field }}
+                      </div>
+                      <div class="form-group col-md-4 mb-0">
+                        {{ form.priority|as_crispy_field }}
+                      </div>
+                      <div class="form-group col-md-4 mb-0">
+                        {{ form.category|as_crispy_field }}
+                      </div>
+                    </div>
+                    {{ form.description | as_crispy_field }}
+                    <div>
+                      {{ form.completed}}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
